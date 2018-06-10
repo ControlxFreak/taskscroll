@@ -47,7 +47,7 @@
 #				   verbosity level? Think about it.
 #	- 04 June 2018 trezza maybe add a -s option for sorting
 # --------------------------------------------------------------------- #
-VERSION=`cat VERSION`
+VERSION=`cat $HOME/repos/projects/taskscroll/VERSION`
 
 # Utility Functions
 function usage() {
@@ -58,9 +58,9 @@ function usage() {
 	echo "  -v 		Set the verbosity level (default 1)"
 	echo "			0 - Silent Mode (do not echo anything but iterate task data as if it did)"
 	echo "			1 - Description Mode ("Task k: <description>")"
-	echo "			2 - Project Mode ("Task k: <project>:<description>")"
-	echo "			3 - Due Date Mode ("Task k (Due on <date>): <project>:<description>")"
-	echo "			4 - Urgency Mode ("Task k (Due on <date>, Urgency <urgency>: <project>:<description>")"
+	#echo "			2 - Project Mode ("Task k: <project>:<description>")"
+	#echo "			3 - Due Date Mode ("Task k (Due on <date>): <project>:<description>")"
+	#echo "			4 - Urgency Mode ("Task k (Due on <date>, Urgency <urgency>: <project>:<description>")"
 	echo "			(where k=task number)"
 } # usage()
 
@@ -68,18 +68,18 @@ function help() {
 	echo "TaskScroll: (Version: $VERSION)"
 	echo "	Scrolls through your taskwarrior tasks, formats and echos them back to you!  Awesome for polybar!"
 	echo""
-	usage()
+	usage
 } # help()
 
 function getTaskInfo(){
-	task $TASKNUM info | grep "$1" | sed 's/\"$1"   //g'
+	echo $0
 } # getTaskInfo()
 
 # Get the input options
 VERBOSITY=1 # Default verbosity to just print the description of the next task
 COMPLETETASK=false
 
-while getopts ":hcv" opt; do
+while getopts ":hcv:" opt; do
 	case ${opt} in
 		h )
 			help
@@ -126,7 +126,7 @@ fi
 # 1. Grab the current task number, if it is empty, default it to the first task.
 TASKNUM=`cat "$DATAFILE"`
 
-if [ -z "$TASKNUM" || "$TASKNUM" -lte 0 ]; then
+if [ -z "$TASKNUM" ]; then
 	TASKNUM=1
 fi
 
@@ -144,15 +144,15 @@ if [ "$TASKNUM" -gt "$NUMTASKS" ]; then
 fi
 
 # 4. Query taskwarrior and echo the description of the task 
-if [ $COMPLETETASK ]; then 
+if [ $COMPLETETASK = true ]; then 
 
 	task $TASKNUM done
 
 else 
-	PROJECT=getTaskInfo "Project"
-	DESCRIPTION=getTaskInfo "Description"
-	DUE=getTaskInfo "Due"
-	URGENCY=getTaskInfo "Urgency"
+	PROJECT=`task $TASKNUM info | grep Project | sed 's/\Project//g' | sed -e 's/^[ \t]*//'`
+	DESCRIPTION=`task $TASKNUM info | grep Description | sed 's/\Description//g'| sed -e 's/^[ \t]*//'`
+	DUE=`task $TASKNUM info | grep Due | sed 's/\Due//g' | sed -e 's/^[ \t]*//'`
+	Urgency=`task $TASKNUM info | grep Urgency | sed 's/\Urgency//g' | sed -e 's/^[ \t]*//'`
 
 	case ${VERBOSITY} in
 		0 )
@@ -169,7 +169,7 @@ else
 		4 )
 			echo "Task $TASKNUM (Due: $DUE, Urgency: $URGENCY): $PROJECT: $DESCRIPTION"
 			;;
-		\? )
+		* )
 			echo "Unknown Verbosity!"
 			usage
 			exit 1
