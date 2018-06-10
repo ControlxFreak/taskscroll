@@ -1,0 +1,28 @@
+# Maintainer: Anthony Trezza <email>
+pkgname=taskscroll
+pkgver=0.1
+pkgdesc="Scrolls through your taskwarrior tasks, formats and echos them back to you!  Awesome for polybar!"
+arch=('any')
+url="todo"
+license=('MIT')
+groups=()
+depends=('bash', 'taskwarrior')
+makedepends=()
+checkdepends=()
+optdepends=()
+provides=()
+conflicts=()
+replaces=()
+backup=()
+options=()
+install=
+changelog=
+source="todo"
+noextract=()
+md5sums=('todo')
+
+package() {
+	cd "$pkgname-$pkgver"
+	mkdir -p "$pkgdir/usr/bin"
+	cp "taskscroll" "$pkgdir/usr/bin/taskscroll"
+}
